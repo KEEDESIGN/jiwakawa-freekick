@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>じわかわフリーキック ⚽</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Minimal HUD Overlay -->
+    <div class="hud-overlay">
+      <div class="hud-score">
+        <span class="hud-label">連続GOAL</span>
+        <span class="hud-value" id="streak-count">0</span>
+      </div>
+      <div class="hud-title">じわかわフリーキック</div>
+      <div class="hud-right">
+        <div class="hud-score mini">
+          <span class="hud-label">BEST</span>
+          <span class="hud-value" id="best-count">0</span>
+        </div>
+        <button id="sound-btn" class="hud-btn" title="音切替">🔊</button>
+        <button id="reset-btn" class="hud-btn" title="リセット">🔄</button>
+      </div>
+    </div>
+
+    <!-- Main Game Canvas (Background, Wall, Ball, Player) -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- State Banners -->
+    <div id="prompt-banner" class="prompt-banner">
+      レッツシュート！<br><small>ボールをゴールへフリック</small>
+    </div>
+
+    <div id="result-banner" class="result-banner hidden">
+      <div id="result-text" class="result-text">GOAL!!</div>
+      <div id="result-sub" class="result-sub"></div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

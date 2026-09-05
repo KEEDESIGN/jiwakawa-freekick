@@ -1,0 +1,17 @@
+{
+  "name": "jiwakawa-freekick",
+  "version": "1.0.0",
+  "description": "じわかわフリーキック - サッカーフリーキックWebゲーム",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "firebase deploy --only hosting"
+  },
+  "keywords": ["soccer", "freekick", "game", "jiwakawa"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}
