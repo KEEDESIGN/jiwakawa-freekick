@@ -1,5 +1,5 @@
 /**
- * じわかわフリーキック - Game Engine
+ * じわかわフリーキック - Game Engine (Aspect Ratio Preserved)
  */
 
 class SoundFX {
@@ -99,7 +99,6 @@ class SoundFX {
   }
 
   playSlip() {
-    // Funny whistle / whoosh on slip through
     if (!this.enabled || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
@@ -157,7 +156,7 @@ class Game {
     this.bestStreak = parseInt(localStorage.getItem('jk_best') || '0', 10);
     this.bestEl.textContent = this.bestStreak;
 
-    this.state = 'READY'; // READY, AIMING, FLYING, RESULT
+    this.state = 'READY';
     this.width = 600;
     this.height = 800;
 
@@ -195,8 +194,8 @@ class Game {
     // Wall state
     this.wall = {
       xRatio: 0.5,
-      yRatio: 0.58,
-      widthRatio: 0.44, // Generous width
+      yRatio: 0.65,
+      widthRatio: 0.44,
       heightRatio: 0.30,
       jump: 0,
       squash: 1,
@@ -296,7 +295,6 @@ class Game {
         const end = this.strokePoints[this.strokePoints.length - 1];
         const totalDy = end.y - start.y;
 
-        // Swiped upwards by at least 15px
         if (totalDy < -15) {
           this.kickWithStroke(this.strokePoints);
         } else {
@@ -339,7 +337,6 @@ class Game {
     this.sparks = [];
     this.floatingTexts = [];
 
-    // Randomize Wall position each round
     const wallPositions = [0.3, 0.5, 0.7];
     if (this.streak === 0) {
       this.wall.xRatio = Math.random() > 0.5 ? 0.32 : 0.68;
@@ -362,10 +359,13 @@ class Game {
     const dx = end.x - start.x;
     const dy = end.y - start.y;
 
-    this.ball.targetX = this.width * 0.5 + dx * 1.8;
-    this.ball.targetY = Math.max(Math.min(this.height * 0.24 + dy * 0.6, this.height * 0.45), this.height * 0.05);
+    // Background natural height (1:1 square)
+    const bgScale = this.width;
+    const goalCenterY = bgScale * 0.25;
 
-    // Compute curve offsets along stroke
+    this.ball.targetX = this.width * 0.5 + dx * 1.8;
+    this.ball.targetY = Math.max(Math.min(goalCenterY + dy * 0.5, bgScale * 0.44), bgScale * 0.05);
+
     const offsets = [];
     const strokeLen = stroke.length;
     let netCurve = 0;
@@ -452,28 +452,26 @@ class Game {
 
       // Wall collision check at t ≈ 0.46 to 0.58
       if (t >= 0.46 && t <= 0.58 && !b.hasSlipped) {
-        const wallW = this.width * this.wall.widthRatio * 0.85; // slightly forgiving hit box
-        const wallH = this.height * this.wall.heightRatio * 0.88;
+        const bgScale = this.width;
+        const wallW = this.width * this.wall.widthRatio * 0.85;
+        const wallH = bgScale * this.wall.heightRatio * 0.88;
         const wallLeft = this.width * this.wall.xRatio - wallW * 0.5;
         const wallRight = wallLeft + wallW;
-        const wallTop = this.height * this.wall.yRatio - wallH;
-        const wallBottom = this.height * this.wall.yRatio;
+        const wallBottom = bgScale * this.wall.yRatio;
+        const wallTop = wallBottom - wallH;
 
         const ballR = (this.width * 0.18 * b.scale) * 0.4;
 
         if (b.x + ballR > wallLeft && b.x - ballR < wallRight && b.y + ballR > wallTop && b.y - ballR < wallBottom) {
-          // RANDOM SLIP-THROUGH CHANCE (40% of wall contacts slip through!)
           const canSlip = Math.random() < 0.40;
 
           if (canSlip) {
-            // SLIP THROUGH! (股抜き・油断すり抜け)
             b.hasSlipped = true;
             this.sound.playSlip();
             this.wall.shake = 8;
             this.addFloatingText(this.width * this.wall.xRatio, wallTop - 10, ['すり抜けたー！', '股抜き成功！', '壁の油断！', 'ギリギリ通過！'][Math.floor(Math.random() * 4)], '#2ed573');
             this.spawnSparks(b.x, b.y, '#2ed573', 12);
           } else {
-            // HIT WALL & BLOCKED!
             b.isBlocked = true;
             b.blockBounceX = (Math.random() - 0.5) * 6;
             b.blockBounceY = -7;
@@ -500,17 +498,16 @@ class Game {
     const bx = this.ball.x;
     const by = this.ball.y;
     const w = this.width;
-    const h = this.height;
+    const bgScale = this.width; // 1:1 aspect ratio
 
     const xRatio = bx / w;
-    const yRatio = by / h;
+    const yRatio = by / bgScale;
 
     const isLeftPost = (xRatio >= 0.165 && xRatio <= 0.235 && yRatio >= 0.065 && yRatio <= 0.430);
     const isRightPost = (xRatio >= 0.755 && xRatio <= 0.825 && yRatio >= 0.065 && yRatio <= 0.430);
     const isCrossbar = (yRatio >= 0.065 && yRatio <= 0.138 && xRatio >= 0.165 && xRatio <= 0.825);
 
     if (isLeftPost || isRightPost || isCrossbar) {
-      // POST HIT! (枠直撃)
       this.sound.playPost();
       this.spawnSparks(bx, by, '#fff', 16);
 
@@ -525,9 +522,7 @@ class Game {
       return;
     }
 
-    // STRICT INNER NET AREA (GOAL)
     if (xRatio > 0.235 && xRatio < 0.755 && yRatio > 0.138 && yRatio < 0.425) {
-      // GOAL!!
       this.sound.playGoal();
       this.spawnSparks(bx, by, '#ffd32a', 24);
 
@@ -541,7 +536,6 @@ class Game {
       this.showResult('goal', 'GOAL!!', 'ナイスシュート！');
       setTimeout(() => this.resetRound(), 1800);
     } else {
-      // MISS
       this.sound.playMiss();
       this.showResult('miss', 'MISS', '枠外…！');
       this.streak = 0;
@@ -589,23 +583,29 @@ class Game {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    // 1. Draw Goal / Field Background
+    const bgScale = this.width; // Maintain 1:1 aspect ratio of background.png!
+
+    // 1. Draw Field Turf Background Color (covers whole screen down to bottom)
+    ctx.fillStyle = '#6eff82';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // 2. Draw Goal & Sky Background with 1:1 Aspect Ratio (No Vertical Stretching!)
     if (this.images.bg.complete) {
-      ctx.drawImage(this.images.bg, 0, 0, this.width, this.height);
+      ctx.drawImage(this.images.bg, 0, 0, this.width, bgScale);
     }
 
-    // 2. Draw Wall Dummy (LARGE in middle field with shake)
+    // 3. Draw Wall Dummy (scaled proportionally on the pitch)
     if (this.images.wall.complete) {
       const wallW = this.width * this.wall.widthRatio;
-      const wallH = this.height * this.wall.heightRatio;
+      const wallH = bgScale * this.wall.heightRatio;
       const shakeOffset = (Math.random() - 0.5) * this.wall.shake;
       const wallX = this.width * this.wall.xRatio - wallW * 0.5 + shakeOffset;
-      const wallY = this.height * this.wall.yRatio - wallH + this.wall.jump;
+      const wallY = bgScale * this.wall.yRatio - wallH + this.wall.jump;
 
       // Wall Ground Shadow
       ctx.save();
       ctx.beginPath();
-      ctx.ellipse(this.width * this.wall.xRatio + shakeOffset, this.height * this.wall.yRatio, wallW * 0.45, wallH * 0.12, 0, 0, Math.PI * 2);
+      ctx.ellipse(this.width * this.wall.xRatio + shakeOffset, bgScale * this.wall.yRatio, wallW * 0.45, wallH * 0.12, 0, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
       ctx.fill();
       ctx.restore();
@@ -613,7 +613,7 @@ class Game {
       ctx.drawImage(this.images.wall, wallX, wallY, wallW, wallH);
     }
 
-    // 3. Draw Swipe Stroke Trail (Glowing path showing the user's curve)
+    // 4. Draw Swipe Stroke Trail (Glowing path showing the user's curve)
     if (this.state === 'AIMING' && this.strokePoints.length >= 2) {
       ctx.save();
       ctx.strokeStyle = '#ffd32a';
@@ -638,14 +638,15 @@ class Game {
       ctx.restore();
     }
 
-    // 4. Draw Soccer Ball (Behind player's kicking zone)
+    // 5. Draw Soccer Ball (Behind player's kicking zone)
     if (this.images.ball.complete) {
       const ballSize = Math.max(this.width * 0.22 * this.ball.scale, 16);
+      const bgScale = this.width;
 
       // Ball Shadow
       ctx.save();
       ctx.beginPath();
-      ctx.ellipse(this.ball.x, this.ball.startY - (this.ball.startY - this.height * 0.43) * (this.ball.progress || 0), ballSize * 0.4, ballSize * 0.14, 0, 0, Math.PI * 2);
+      ctx.ellipse(this.ball.x, this.ball.startY - (this.ball.startY - bgScale * 0.43) * (this.ball.progress || 0), ballSize * 0.4, ballSize * 0.14, 0, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
       ctx.fill();
       ctx.restore();
@@ -658,12 +659,11 @@ class Game {
       ctx.restore();
     }
 
-    // 5. Draw Player in FRONT FOREGROUND at bottom (with blue striped jersey clearly visible)
+    // 6. Draw Player in FRONT FOREGROUND at bottom (blue striped uniform clearly visible)
     if (this.images.player.complete) {
       const pW = this.width * 0.62;
       const pH = pW;
       const pX = this.width * 0.5 - pW * 0.5;
-      // Position player so the blue striped uniform and shoulders are fully visible!
       const pY = this.height - pH * 0.88 + this.playerRecoil * 18;
 
       ctx.save();
@@ -673,7 +673,7 @@ class Game {
       ctx.restore();
     }
 
-    // 6. Draw Sparks
+    // 7. Draw Sparks
     this.sparks.forEach(s => {
       ctx.save();
       ctx.globalAlpha = s.life;
@@ -684,7 +684,7 @@ class Game {
       ctx.restore();
     });
 
-    // 7. Draw Floating Comic Text Reactions
+    // 8. Draw Floating Comic Text Reactions
     this.floatingTexts.forEach(ft => {
       ctx.save();
       ctx.globalAlpha = ft.life;
