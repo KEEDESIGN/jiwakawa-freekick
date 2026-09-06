@@ -218,7 +218,7 @@ html, body {
 /* ================= Result Banner ================= */
 .result-banner {
   position: absolute;
-  top: 30%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -235,9 +235,9 @@ html, body {
 }
 
 .result-text {
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 900;
-  padding: 8px 24px;
+  padding: 6px 20px;
   border-radius: 16px;
   color: #fff;
   text-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -265,13 +265,67 @@ html, body {
 }
 
 .result-sub {
-  margin-top: 8px;
-  font-size: 16px;
+  margin-top: 6px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
   background: rgba(0,0,0,0.8);
-  padding: 4px 14px;
-  border-radius: 12px;
+  padding: 4px 12px;
+  border-radius: 10px;
+}
+
+/* ================= OpenSea NFT Pop-art Card Reveal Overlay ================= */
+.nft-snap-card-overlay {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nft-snap-card-overlay.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.0);
+}
+
+.nft-card {
+  background: #ffffff;
+  border: 3px solid #1a1a2e;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: 10px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.nft-card-badge {
+  background: linear-gradient(135deg, #2ed573, #ffd32a);
+  color: #1a1a2e;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 4px 16px;
+  border: 2px solid #1a1a2e;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  box-shadow: 2px 2px 0px #1a1a2e;
+  text-transform: uppercase;
+}
+
+.nft-card-img {
+  width: 176px;
+  height: 176px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px 225px 15px 255px / 255px 15px 225px 18px;
+  border: 2.5px solid #1a1a2e;
+  background: #f0f0f5;
+  box-shadow: 2px 2px 0px #1a1a2e;
 }
 
 /* ================= Menu Modal Popup ================= */

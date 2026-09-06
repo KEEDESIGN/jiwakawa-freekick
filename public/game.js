@@ -1,6 +1,15 @@
 /**
- * じわかわフリーキック - Game Engine (with Animated Splash Screen)
+ * じわかわフリーキック - Game Engine (with Animated Splash Screen & NFT Celebration)
  */
+
+const INITIAL_SNAP_NFTS = [
+  { id: '#942', title: 'SNAP #942', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/036dfc60761da4281148884be50278/a9036dfc60761da4281148884be50278.jpeg' },
+  { id: '#941', title: 'SNAP #941', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/aff518147bff75e7dde894b7532d40/93aff518147bff75e7dde894b7532d40.png' },
+  { id: '#940', title: 'SNAP #940', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/32fdfd1e387097790c858d41c6983f/5f32fdfd1e387097790c858d41c6983f.png' },
+  { id: '#939', title: 'SNAP #939', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/d6ef4a93dd33467e775ce4f6d61c97/40d6ef4a93dd33467e775ce4f6d61c97.png' },
+  { id: '#938', title: 'SNAP #938', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/24dc2539bbcebdd0b98870bbdd9128/2024dc2539bbcebdd0b98870bbdd9128.jpeg' },
+  { id: '#937', title: 'SNAP #937', image: 'https://i2c.seadn.io/base/0x129ac4f066f0838f2657987516cdd8b214b1b608/0ee972212c3bd7bc3708fe03b930ca/3f0ee972212c3bd7bc3708fe03b930ca.jpeg' }
+];
 
 class SoundFX {
   constructor() {
@@ -226,7 +235,55 @@ class Game {
     this.floatingTexts = [];
     this.sparks = [];
 
+    // OpenSea NFT Dataset for Celebrations
+    this.nftCollection = [...INITIAL_SNAP_NFTS];
+    this.isNftPopupActive = false;
+    this.fetchOpenSeaNFTs();
+
     this.init();
+  }
+
+  async fetchOpenSeaNFTs() {
+    try {
+      const res = await fetch('/nfts.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          this.nftCollection = data.map(item => ({
+            id: `#${item.token_id}`,
+            title: `SNAP #${item.token_id}`,
+            image: item.image_url,
+            openseaUrl: item.opensea_url
+          }));
+        }
+      }
+    } catch (e) {
+      console.log('Using initial fallback SNAP dataset');
+    }
+  }
+
+  showOpenSeaNFTPopup() {
+    if (this.isNftPopupActive || this.nftCollection.length === 0) return;
+    const nft = this.nftCollection[Math.floor(Math.random() * this.nftCollection.length)];
+
+    const overlay = document.getElementById('nft-snap-card-overlay');
+    const imgEl = document.getElementById('nft-card-img');
+    const badgeEl = document.getElementById('nft-card-badge');
+
+    if (overlay && imgEl && nft && (nft.image || nft.image_url)) {
+      this.isNftPopupActive = true;
+      imgEl.src = nft.image || nft.image_url;
+      if (badgeEl) {
+        const words = ['GOAL!!', 'NICE SHOT!', 'GREAT!', 'SUPER GOAL!', 'PERFECT!!', 'AWESOME!'];
+        badgeEl.textContent = words[Math.floor(Math.random() * words.length)];
+      }
+
+      overlay.classList.add('active');
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        this.isNftPopupActive = false;
+      }, 1900);
+    }
   }
 
   async init() {
@@ -603,7 +660,8 @@ class Game {
       this.recordKickStats(true);
       this.updateHUD();
       this.showResult('goal', 'GOAL!!', 'ナイスシュート！');
-      setTimeout(() => this.resetRound(), 1800);
+      this.showOpenSeaNFTPopup();
+      setTimeout(() => this.resetRound(), 2100);
     } else {
       this.sound.playMiss();
       this.showResult('miss', 'MISS', '枠外…！');
