@@ -166,7 +166,7 @@ class Game {
     this.sound = new SoundFX();
 
     this.streak = 0;
-    this.bestStreak = parseInt(localStorage.getItem('jk_best') || '0', 10);
+    this.bestStreak = parseInt(localStorage.getItem('townsnap_freekick_best_streak') || localStorage.getItem('jk_best') || '0', 10);
     this.updateHUD();
 
     this.state = 'READY';
@@ -598,7 +598,9 @@ class Game {
       if (this.streak > this.bestStreak) {
         this.bestStreak = this.streak;
         localStorage.setItem('jk_best', this.bestStreak);
+        localStorage.setItem('townsnap_freekick_best_streak', this.bestStreak);
       }
+      this.recordKickStats(true);
       this.updateHUD();
       this.showResult('goal', 'GOAL!!', 'ナイスシュート！');
       setTimeout(() => this.resetRound(), 1800);
@@ -606,8 +608,33 @@ class Game {
       this.sound.playMiss();
       this.showResult('miss', 'MISS', '枠外…！');
       this.streak = 0;
+      this.recordKickStats(false);
       this.updateHUD();
       setTimeout(() => this.resetRound(), 1800);
+    }
+  }
+
+  recordKickStats(isGoal) {
+    const kicks = parseInt(localStorage.getItem('townsnap_freekick_total_kicks') || '0', 10) + 1;
+    localStorage.setItem('townsnap_freekick_total_kicks', kicks);
+
+    if (isGoal) {
+      const goals = parseInt(localStorage.getItem('townsnap_freekick_total_goals') || '0', 10) + 1;
+      localStorage.setItem('townsnap_freekick_total_goals', goals);
+    }
+
+    const currentUsername = localStorage.getItem('townsnap_current_user');
+    if (currentUsername) {
+      try {
+        const raw = localStorage.getItem(`townsnap_user_${currentUsername.toLowerCase()}`);
+        if (raw) {
+          const user = JSON.parse(raw);
+          user.fkBestStreak = Math.max(user.fkBestStreak || 0, this.bestStreak);
+          if (isGoal) user.fkTotalGoals = (user.fkTotalGoals || 0) + 1;
+          user.fkTotalKicks = (user.fkTotalKicks || 0) + 1;
+          localStorage.setItem(`townsnap_user_${currentUsername.toLowerCase()}`, JSON.stringify(user));
+        }
+      } catch (e) {}
     }
   }
 
