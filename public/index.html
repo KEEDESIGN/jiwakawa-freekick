@@ -8,24 +8,14 @@
 </head>
 <body>
   <div id="game-container">
-    <!-- Minimal HUD Overlay -->
-    <div class="hud-overlay">
-      <div class="hud-score">
-        <span class="hud-label">連続GOAL</span>
-        <span class="hud-value" id="streak-count">0</span>
-      </div>
-      <div class="hud-title">じわかわフリーキック</div>
-      <div class="hud-right">
-        <div class="hud-score mini">
-          <span class="hud-label">BEST</span>
-          <span class="hud-value" id="best-count">0</span>
-        </div>
-        <button id="sound-btn" class="hud-btn" title="音切替">🔊</button>
-        <button id="reset-btn" class="hud-btn" title="リセット">🔄</button>
-      </div>
-    </div>
+    <!-- Single Floating Menu Button (Top Right Corner) -->
+    <button id="menu-btn" class="floating-menu-btn" title="メニュー・スコア">
+      <span class="menu-icon">⚽</span>
+      <span class="menu-streak" id="streak-badge">0</span>
+      <span class="menu-gear">⚙️</span>
+    </button>
 
-    <!-- Main Game Canvas (Background, Wall, Ball, Player) -->
+    <!-- Main Game Canvas -->
     <canvas id="game-canvas"></canvas>
 
     <!-- State Banners -->
@@ -36,6 +26,37 @@
     <div id="result-banner" class="result-banner hidden">
       <div id="result-text" class="result-text">GOAL!!</div>
       <div id="result-sub" class="result-sub"></div>
+    </div>
+
+    <!-- Popup Menu Modal (Opens on button tap) -->
+    <div id="menu-modal" class="menu-modal hidden">
+      <div class="menu-backdrop" id="menu-backdrop"></div>
+      <div class="menu-card">
+        <div class="menu-card-header">
+          <h2 class="menu-title">じわかわフリーキック ⚽</h2>
+          <button id="close-menu-btn" class="close-btn" title="閉じる">✕</button>
+        </div>
+
+        <div class="menu-stats">
+          <div class="stat-box">
+            <span class="stat-label">現在の連続ゴール</span>
+            <span class="stat-value" id="modal-streak">0</span>
+          </div>
+          <div class="stat-box best">
+            <span class="stat-label">最高記録 (BEST)</span>
+            <span class="stat-value gold" id="modal-best">0</span>
+          </div>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="sound-btn" class="modal-action-btn">
+            <span id="sound-icon">🔊</span> サウンド: <span id="sound-status">ON</span>
+          </button>
+          <button id="reset-btn" class="modal-action-btn danger">
+            🔄 最初からやり直す
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

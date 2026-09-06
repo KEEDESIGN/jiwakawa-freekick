@@ -1,5 +1,5 @@
 /**
- * じわかわフリーキック - Game Engine (Aspect Ratio Preserved)
+ * じわかわフリーキック - Game Engine
  */
 
 class SoundFX {
@@ -141,10 +141,19 @@ class Game {
     this.ctx = this.canvas.getContext('2d');
     this.container = document.getElementById('game-container');
 
-    this.streakEl = document.getElementById('streak-count');
-    this.bestEl = document.getElementById('best-count');
+    // Single Floating Menu Elements
+    this.menuBtn = document.getElementById('menu-btn');
+    this.streakBadge = document.getElementById('streak-badge');
+    this.menuModal = document.getElementById('menu-modal');
+    this.menuBackdrop = document.getElementById('menu-backdrop');
+    this.closeMenuBtn = document.getElementById('close-menu-btn');
+    this.modalStreak = document.getElementById('modal-streak');
+    this.modalBest = document.getElementById('modal-best');
     this.soundBtn = document.getElementById('sound-btn');
+    this.soundIcon = document.getElementById('sound-icon');
+    this.soundStatus = document.getElementById('sound-status');
     this.resetBtn = document.getElementById('reset-btn');
+
     this.promptBanner = document.getElementById('prompt-banner');
     this.resultBanner = document.getElementById('result-banner');
     this.resultText = document.getElementById('result-text');
@@ -154,7 +163,7 @@ class Game {
 
     this.streak = 0;
     this.bestStreak = parseInt(localStorage.getItem('jk_best') || '0', 10);
-    this.bestEl.textContent = this.bestStreak;
+    this.updateHUD();
 
     this.state = 'READY';
     this.width = 600;
@@ -226,6 +235,12 @@ class Game {
     requestAnimationFrame(() => this.loop());
   }
 
+  updateHUD() {
+    if (this.streakBadge) this.streakBadge.textContent = this.streak;
+    if (this.modalStreak) this.modalStreak.textContent = this.streak;
+    if (this.modalBest) this.modalBest.textContent = this.bestStreak;
+  }
+
   handleResize() {
     const rect = this.container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -244,15 +259,37 @@ class Game {
   }
 
   bindEvents() {
-    this.soundBtn.addEventListener('click', () => {
+    // Menu Modal open/close
+    this.menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       this.sound.init();
-      const on = this.sound.toggle();
-      this.soundBtn.textContent = on ? '🔊' : '🔇';
+      this.updateHUD();
+      this.menuModal.classList.remove('hidden');
     });
 
-    this.resetBtn.addEventListener('click', () => {
+    const closeMenu = (e) => {
+      e.stopPropagation();
+      this.menuModal.classList.add('hidden');
+    };
+
+    this.closeMenuBtn.addEventListener('click', closeMenu);
+    this.menuBackdrop.addEventListener('click', closeMenu);
+
+    // Sound button in modal
+    this.soundBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.init();
+      const on = this.sound.toggle();
+      this.soundIcon.textContent = on ? '🔊' : '🔇';
+      this.soundStatus.textContent = on ? 'ON' : 'OFF';
+    });
+
+    // Reset button in modal
+    this.resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       this.streak = 0;
-      this.streakEl.textContent = '0';
+      this.updateHUD();
+      this.menuModal.classList.add('hidden');
       this.resetRound();
     });
 
@@ -267,6 +304,7 @@ class Game {
     };
 
     const startSwipe = (e) => {
+      if (!this.menuModal.classList.contains('hidden')) return;
       if (this.state === 'RESULT') {
         this.resetRound();
         return;
@@ -359,7 +397,6 @@ class Game {
     const dx = end.x - start.x;
     const dy = end.y - start.y;
 
-    // Background natural height (1:1 square)
     const bgScale = this.width;
     const goalCenterY = bgScale * 0.25;
 
@@ -480,7 +517,7 @@ class Game {
             this.sound.playBlock();
             this.showResult('block', 'BLOCK!', '壁に阻まれた！');
             this.streak = 0;
-            this.streakEl.textContent = '0';
+            this.updateHUD();
             setTimeout(() => this.resetRound(), 1800);
             return;
           }
@@ -498,7 +535,7 @@ class Game {
     const bx = this.ball.x;
     const by = this.ball.y;
     const w = this.width;
-    const bgScale = this.width; // 1:1 aspect ratio
+    const bgScale = this.width;
 
     const xRatio = bx / w;
     const yRatio = by / bgScale;
@@ -517,7 +554,7 @@ class Game {
 
       this.showResult('post', 'POST!', 'ポスト直撃！枠に嫌われた！');
       this.streak = 0;
-      this.streakEl.textContent = '0';
+      this.updateHUD();
       setTimeout(() => this.resetRound(), 1800);
       return;
     }
@@ -527,19 +564,18 @@ class Game {
       this.spawnSparks(bx, by, '#ffd32a', 24);
 
       this.streak++;
-      this.streakEl.textContent = this.streak;
       if (this.streak > this.bestStreak) {
         this.bestStreak = this.streak;
-        this.bestEl.textContent = this.bestStreak;
         localStorage.setItem('jk_best', this.bestStreak);
       }
+      this.updateHUD();
       this.showResult('goal', 'GOAL!!', 'ナイスシュート！');
       setTimeout(() => this.resetRound(), 1800);
     } else {
       this.sound.playMiss();
       this.showResult('miss', 'MISS', '枠外…！');
       this.streak = 0;
-      this.streakEl.textContent = '0';
+      this.updateHUD();
       setTimeout(() => this.resetRound(), 1800);
     }
   }
@@ -583,18 +619,18 @@ class Game {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    const bgScale = this.width; // Maintain 1:1 aspect ratio of background.png!
+    const bgScale = this.width;
 
-    // 1. Draw Field Turf Background Color (covers whole screen down to bottom)
+    // 1. Draw Field Turf Background Color
     ctx.fillStyle = '#6eff82';
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // 2. Draw Goal & Sky Background with 1:1 Aspect Ratio (No Vertical Stretching!)
+    // 2. Draw Goal & Sky Background (1:1 Aspect Ratio)
     if (this.images.bg.complete) {
       ctx.drawImage(this.images.bg, 0, 0, this.width, bgScale);
     }
 
-    // 3. Draw Wall Dummy (scaled proportionally on the pitch)
+    // 3. Draw Wall Dummy
     if (this.images.wall.complete) {
       const wallW = this.width * this.wall.widthRatio;
       const wallH = bgScale * this.wall.heightRatio;
@@ -613,7 +649,7 @@ class Game {
       ctx.drawImage(this.images.wall, wallX, wallY, wallW, wallH);
     }
 
-    // 4. Draw Swipe Stroke Trail (Glowing path showing the user's curve)
+    // 4. Draw Swipe Stroke Trail
     if (this.state === 'AIMING' && this.strokePoints.length >= 2) {
       ctx.save();
       ctx.strokeStyle = '#ffd32a';
@@ -638,7 +674,7 @@ class Game {
       ctx.restore();
     }
 
-    // 5. Draw Soccer Ball (Behind player's kicking zone)
+    // 5. Draw Soccer Ball
     if (this.images.ball.complete) {
       const ballSize = Math.max(this.width * 0.22 * this.ball.scale, 16);
       const bgScale = this.width;
@@ -659,7 +695,7 @@ class Game {
       ctx.restore();
     }
 
-    // 6. Draw Player in FRONT FOREGROUND at bottom (blue striped uniform clearly visible)
+    // 6. Draw Player in FRONT FOREGROUND at bottom
     if (this.images.player.complete) {
       const pW = this.width * 0.62;
       const pH = pW;
