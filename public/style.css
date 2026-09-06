@@ -11,11 +11,97 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #000;
+  background-color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   touch-action: none;
 }
 
+/* ================= Splash Screen ================= */
+.splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.splash.done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.splash-logo {
+  width: 130px;
+  height: auto;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
+  animation: splashPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes splashPop {
+  0% { transform: scale(0.6) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.08) translateY(-6px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.splash-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.8s ease 0.2s forwards;
+  opacity: 0;
+}
+
+.splash-loader {
+  width: 200px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.splash-loader-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ffd32a, #2ed573);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(46, 213, 115, 0.8);
+}
+
+.splash-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ================= Main Game Container ================= */
 #game-container {
   position: relative;
   width: 100vw;
@@ -27,7 +113,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #6effe2;
+  background-color: #6eff82;
 }
 
 #game-canvas {
@@ -76,6 +162,28 @@ html, body {
   font-size: 12px;
   opacity: 0.7;
   margin-left: 2px;
+}
+
+/* ================= Footer Credit ================= */
+.game-footer-credit {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.game-footer-credit span {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 2px 10px;
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
 }
 
 /* ================= Prompt Banner ================= */
@@ -222,8 +330,20 @@ html, body {
   margin-bottom: 18px;
 }
 
+.menu-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 .menu-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   color: #fff;
 }
@@ -285,6 +405,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-bottom: 16px;
 }
 
 .modal-action-btn {
@@ -319,4 +440,19 @@ html, body {
 
 .modal-action-btn.danger:hover {
   background: rgba(255, 71, 87, 0.3);
+}
+
+.modal-credit-footer {
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+}
+
+.modal-credit-footer p {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.modal-credit-footer strong {
+  color: #fff;
 }

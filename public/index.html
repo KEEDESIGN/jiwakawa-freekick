@@ -3,10 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>じわかわフリーキック ⚽</title>
+  <title>じわかわフリーキック ⚽ - TOWN SNAP DESIGN PEOPLE</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/logo.png">
 </head>
 <body>
+  <!-- Animated Splash Screen (TOWN SNAP Style) -->
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <img src="assets/logo.png" alt="TOWN SNAP LOGO" class="splash-logo" id="splashLogo">
+      <h1 class="splash-title">じわかわフリーキック ⚽</h1>
+      <div class="splash-loader">
+        <div class="splash-loader-bar" id="splashBar"></div>
+      </div>
+      <p class="splash-text">Kickoff Loading...</p>
+    </div>
+  </div>
+
   <div id="game-container">
     <!-- Single Floating Menu Button (Top Right Corner) -->
     <button id="menu-btn" class="floating-menu-btn" title="メニュー・スコア">
@@ -28,12 +42,20 @@
       <div id="result-sub" class="result-sub"></div>
     </div>
 
+    <!-- Footer Credits -->
+    <footer class="game-footer-credit">
+      <span>© 2026 KEE / TOWN SNAP DESIGN PEOPLE</span>
+    </footer>
+
     <!-- Popup Menu Modal (Opens on button tap) -->
     <div id="menu-modal" class="menu-modal hidden">
       <div class="menu-backdrop" id="menu-backdrop"></div>
       <div class="menu-card">
         <div class="menu-card-header">
-          <h2 class="menu-title">じわかわフリーキック ⚽</h2>
+          <div class="menu-logo-wrap">
+            <img src="assets/logo.png" alt="Logo" class="menu-logo-img">
+            <h2 class="menu-title">じわかわフリーキック</h2>
+          </div>
           <button id="close-menu-btn" class="close-btn" title="閉じる">✕</button>
         </div>
 
@@ -55,6 +77,10 @@
           <button id="reset-btn" class="modal-action-btn danger">
             🔄 最初からやり直す
           </button>
+        </div>
+
+        <div class="modal-credit-footer">
+          <p>Created by <strong>KEE</strong> / <strong>TOWN SNAP DESIGN PEOPLE</strong></p>
         </div>
       </div>
     </div>

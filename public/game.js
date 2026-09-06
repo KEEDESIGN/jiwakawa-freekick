@@ -1,5 +1,5 @@
 /**
- * じわかわフリーキック - Game Engine
+ * じわかわフリーキック - Game Engine (with Animated Splash Screen)
  */
 
 class SoundFX {
@@ -137,11 +137,15 @@ class SoundFX {
 
 class Game {
   constructor() {
+    // Splash Elements
+    this.splash = document.getElementById('splash');
+    this.splashBar = document.getElementById('splashBar');
+
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
     this.container = document.getElementById('game-container');
 
-    // Single Floating Menu Elements
+    // Menu Elements
     this.menuBtn = document.getElementById('menu-btn');
     this.streakBadge = document.getElementById('streak-badge');
     this.menuModal = document.getElementById('menu-modal');
@@ -225,14 +229,40 @@ class Game {
     this.init();
   }
 
-  init() {
+  async init() {
     this.handleResize();
     window.addEventListener('resize', () => this.handleResize());
 
     this.bindEvents();
     this.resetRound();
 
+    // Start Splash animation sequence
+    this.runSplashSequence();
+
     requestAnimationFrame(() => this.loop());
+  }
+
+  async runSplashSequence() {
+    if (!this.splash) return;
+
+    // Progress bar fills over 1.2 seconds
+    const startTime = Date.now();
+    const duration = 1200;
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / duration) * 100, 100);
+      if (this.splashBar) this.splashBar.style.width = `${pct}%`;
+
+      if (elapsed >= duration) {
+        clearInterval(interval);
+        // Fade out splash
+        this.splash.classList.add('done');
+        setTimeout(() => {
+          if (this.splash) this.splash.style.display = 'none';
+        }, 600);
+      }
+    }, 20);
   }
 
   updateHUD() {
@@ -304,6 +334,7 @@ class Game {
     };
 
     const startSwipe = (e) => {
+      if (this.splash && !this.splash.classList.contains('done')) return;
       if (!this.menuModal.classList.contains('hidden')) return;
       if (this.state === 'RESULT') {
         this.resetRound();
